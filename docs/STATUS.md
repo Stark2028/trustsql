@@ -15,7 +15,9 @@ Last updated: 2026-11-17. Evidence, not intent, determines status.
 | PostgreSQL runtime | Role/execution checks pass | Latest-source preview: direct writes rejected, audit inaccessible, timeout enforced, net revenue matches oracle |
 | Packaged container | Rebuilt and verified locally | Healthy at http://127.0.0.1:8088; 92 tests pass against the installed wheel without source mounts |
 | SQL trust engine | Implemented and verified | CTE value lineage in SQL view; schema validation; financial join-grain guard; authenticated no-execution impact inspection |
-| Cloud deployment | Not deployed | Hostname/hosting account not selected |
+| Public GitHub | Published | https://github.com/Stark2028/trustsql ; exact source tree verified through GitHub API |
+| Cloud deployment | AWS demo verified | Lambda HTTPS in Mumbai; synthetic SQLite warehouse with durable DynamoDB audit; no provider key |
+| Serverless adapter | Verified | 95 Linux tests including PostgreSQL and DynamoDB adapter regressions; actual cloud readiness/query/audit checks pass |
 | Local backup/restore | Verified | pg_dump/pg_restore drill recovered all 60 synthetic orders and control schema v1 in a temporary database |
 
 TrustSQL and PostgreSQL are running locally; open http://127.0.0.1:8088 and enter `TRUSTSQL_API_TOKEN` from ignored `.env.docker` in Connection. Browser checks passed on desktop/mobile; the final packaged app serves identical asset hashes. Its HTTP checks pass liveness, authentication, readiness, reference totals, clarification, catalog, audit, and evaluation report. The app runs as UID 10001 with a read-only application filesystem and no bootstrap credentials. The temporary preview container is gone. Browser evidence is in ignored `artifacts/browser/` and runtime fingerprints are in ignored `artifacts/runtime-fingerprint.json`.

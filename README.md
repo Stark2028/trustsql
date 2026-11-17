@@ -1,5 +1,9 @@
 # TrustSQL
 
+[Public repository](https://github.com/Stark2028/trustsql) · [AWS-hosted demo](https://dkvojj4i5rz4pcaawu2qdrhh4e0mhjaz.lambda-url.ap-south-1.on.aws/)
+
+The hosted edition uses a synthetic SQLite warehouse and durable DynamoDB audit/rate limits for a small student budget. API access requires the owner's deployment token. The full Docker edition uses PostgreSQL. Both remain labelled deterministic demos until live integrations are verified.
+
 A metadata-aware SQL analyst with inspectable evidence, constrained execution, and reproducible evaluation. Built as a DataHub-relevant AI engineering portfolio project.
 
 The SQL trust engine resolves column schemas, traces value origins through CTEs, blocks a known financial join-fanout pattern, and exposes query-scoped schema-impact inspection without execution. See [Trust engine](docs/TRUST_ENGINE.md) for an API example and limitations.

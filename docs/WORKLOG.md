@@ -63,6 +63,14 @@
 - Final installed-package verification: 92 tests passed including PostgreSQL and inspection authorization. Both evaluation suites pass (18/18 and 96/96). Desktop/mobile browser checks pass, including the new lineage table; HTTP smoke and asset equality pass.
 - App is rebuilt and healthy on port 8088. Updated the resume with actual lineage/impact features and verified counts. No production/live model accuracy claims or public deployment were introduced.
 
+## 2026-11-17 — Public GitHub and AWS deployment
+
+- User authorized public GitHub publication and AWS deployment, requested a below-US$5 target and no custom domain, and explicitly accepted that usage-based charges can exceed the target under heavy use.
+- Deployed a synthetic serverless demo: Lambda HTTPS, SQLite fixture, DynamoDB audit/rate limits, scoped execution role, short-retention logs, private artifact bucket, and account-wide US$4 budget monitor. No VM, RDS, ALB, NAT gateway, or provider key was created/deployed. Account concurrency quota is 10.
+- Full Linux regression: 95 passed. Actual cloud frontend/auth/readiness/query/audit checks passed; CloudFormation CREATE_COMPLETE.
+- Scanned 86 initial staged files against local secrets and token patterns. Public repository is https://github.com/Stark2028/trustsql. Git transport failed; GitHub API publication verified the exact tree and aligned local history. No user history was overwritten; only a helper initialization commit in the newly created repository was replaced.
+- Resume now includes the actual repository URL. AWS owner token stays in ignored var/aws/api.env. Live provider compatibility/DataHub remain pending; the cloud edition is not the full PostgreSQL production edition.
+
 ## 2026-11-17 — First paid provider smoke check
 
 - User confirmed the key was added after being told the next step was one small request.
