@@ -15,7 +15,7 @@ def main():
     )
     secret_values = [
         str(v).encode()
-        for p in [".env", ".env.docker"]
+        for p in [".env", ".env.docker", "var/aws/api.env"]
         if Path(p).exists()
         for k, v in dotenv_values(p).items()
         if v and any(t in k for t in ["KEY", "TOKEN", "PASSWORD"]) and len(str(v)) >= 12

@@ -6,6 +6,7 @@ Last updated: 2026-11-17. Evidence, not intent, determines status.
 |---|---|---|
 | Architecture and project records | Created | ARCHITECTURE.md, DECISIONS.md, PRODUCT.md |
 | Analyst interface | Implemented; browser checked | Desktop 1440px/mobile 390px, no JS errors or horizontal overflow; all main flows pass against PostgreSQL-backed preview |
+| Hosted connection onboarding | Fixed and deployed | Fresh visits open Connection without a global error; missing/invalid/valid token and reload flows pass on hosted desktop/mobile; unauthenticated API remains 401 |
 | SQL execution and policy | Implemented; regression checked | 92 tests pass in Linux including PostgreSQL, lineage, impact, and semantic-guard regressions |
 | Synthetic commerce data | Verified | Independent Python oracle matches net/gross/refund/count SQL across three seeds |
 | DataHub integration | Implemented; contract checked | Real endpoint/ingestion readback pending; user will configure later |

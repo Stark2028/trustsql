@@ -24,7 +24,7 @@
       </nav>
       <div class="sidebar-bottom">
         <div class="connection-state"><span class="status-dot" id="connection-dot"></span><span id="connection-label">Connecting to workspace</span></div>
-        <details class="connection-settings"><summary>Connection</summary><form id="token-form"><label for="api-token">Workspace API token</label><input id="api-token" type="password" autocomplete="off" placeholder="Required on protected instances"><button class="secondary-button" type="submit">Connect</button><p>Kept in memory for this tab. Cleared on reload.</p></form></details>
+        <details id="connection-settings" class="connection-settings"><summary>Connection</summary><form id="token-form"><label for="api-token">Workspace API token</label><input id="api-token" type="password" autocomplete="off" placeholder="Enter this workspace's token" aria-describedby="token-help token-error"><p id="token-help">Use the token supplied by the workspace owner. Kept in memory for this tab; enter it again after reloading.</p><p id="token-error" class="notice error-notice" role="alert" hidden></p><button id="connect-button" class="secondary-button" type="submit">Connect</button></form></details>
         <p class="sidebar-footnote">Context before confidence.</p>
       </div>
     </aside>
@@ -32,6 +32,7 @@
     <div class="main-shell">
       <header class="topbar"><span>Workspace <span class="crumb-separator">/</span> <strong id="view-name">SQL analyst</strong></span><div class="topbar-meta"><span id="mode-badge" class="mode-badge">Connecting</span><span id="reference-date">Reference date loading</span></div></header>
       <main id="main" tabindex="-1">
+        <div id="connection-notice" class="notice" role="status" hidden><strong>Connect this workspace.</strong> Enter its workspace API token in Connection to run analysis and browse data.</div>
         <div id="global-error" class="notice error-notice" role="alert" hidden></div>
 
         <section id="view-analyst" class="view" aria-labelledby="analyst-heading">

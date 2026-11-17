@@ -12,7 +12,10 @@ from playwright.sync_api import expect, sync_playwright
 
 
 def main():
-    token = dotenv_values(".env.docker").get("TRUSTSQL_API_TOKEN", "")
+    token = dotenv_values(os.environ.get("TRUSTSQL_SMOKE_TOKEN_FILE", ".env.docker")).get(
+        "TRUSTSQL_API_TOKEN", ""
+    )
+    assert token, "Configure a workspace token in the smoke test's ignored env file"
     output = Path("artifacts/browser")
     output.mkdir(parents=True, exist_ok=True)
     errors = []
@@ -26,10 +29,26 @@ def main():
         page.goto(
             os.environ.get("TRUSTSQL_SMOKE_BASE_URL", "http://127.0.0.1:8088"), wait_until="networkidle"
         )
-        page.locator(".connection-settings summary").click()
+        expect(page.locator("#connection-notice")).to_be_visible()
+        expect(page.locator("#connection-settings")).to_have_attribute("open", "")
+        expect(page.locator("#global-error")).to_be_hidden()
+        expect(page.locator("#run-button")).to_be_disabled()
+        page.screenshot(path=str(output / "connection-desktop.png"), full_page=True)
+        page.set_viewport_size({"width": 390, "height": 844})
+        expect(page.get_by_label("Workspace API token")).to_be_visible()
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+        page.screenshot(path=str(output / "connection-mobile.png"), full_page=True)
+        page.set_viewport_size({"width": 1440, "height": 1000})
+        page.get_by_label("Workspace API token").fill("synthetic-invalid-token")
+        page.get_by_role("button", name="Connect", exact=True).click()
+        expect(page.locator("#token-error")).to_contain_text("not accepted")
+        expect(page.locator("#api-token")).to_have_attribute("aria-invalid", "true")
+        expect(page.locator("#api-token")).to_have_value("")
         page.get_by_label("Workspace API token").fill(token)
         page.get_by_role("button", name="Connect", exact=True).click()
         expect(page.locator("#mode-badge")).to_have_text("Deterministic demo")
+        expect(page.locator("#connection-notice")).to_be_hidden()
+        expect(page.locator("#token-error")).to_be_hidden()
         page.locator(".connection-settings summary").click()
         page.get_by_label("What would you like to understand?").fill("What was our net revenue last month?")
         page.get_by_role("button", name="Run analysis").click()
@@ -56,7 +75,12 @@ def main():
         page.locator(".catalog-entry summary").first.click()
         expect(page.locator(".catalog-entry-content").first).to_be_visible()
         page.get_by_role("button", name="Evaluations", exact=True).click()
-        expect(page.locator("#evaluation-content")).to_contain_text("not LLM accuracy")
+        evaluation_text = (
+            "No evaluation report yet."
+            if os.environ.get("TRUSTSQL_SMOKE_EVALUATION", "report") == "empty"
+            else "not LLM accuracy"
+        )
+        expect(page.locator("#evaluation-content")).to_contain_text(evaluation_text)
         page.get_by_role("button", name="Run history").click()
         expect(page.locator("#history-content tbody tr").first).to_be_visible()
         page.get_by_role("button", name="SQL analyst", exact=True).click()
@@ -67,6 +91,10 @@ def main():
         expect(page.locator("#answer-status")).to_have_text("Analysis complete")
         expect(page.locator("#result-table tbody tr")).to_have_count(5)
         expect(page.locator("#result-chart svg")).to_be_visible()
+        page.reload(wait_until="networkidle")
+        expect(page.locator("#connection-notice")).to_be_visible()
+        expect(page.locator("#api-token")).to_have_value("")
+        expect(page.locator("#global-error")).to_be_hidden()
         assert not errors, errors
         browser.close()
     print(
@@ -81,6 +109,7 @@ def main():
                 "history": "passed",
                 "chart": "passed",
                 "page_errors": errors,
+                "authentication_onboarding": "passed",
             }
         )
     )

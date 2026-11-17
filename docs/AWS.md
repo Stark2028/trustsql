@@ -8,6 +8,10 @@ There is no always-on VM, RDS, NAT gateway, load balancer, or custom domain char
 
 API routes require a fresh, deployment-specific bearer token saved locally in ignored `var/aws/api.env`. The frontend shell is publicly readable. No Fable key, local database password, or AWS credential is bundled or copied to GitHub/Lambda. The execution role accesses only its DynamoDB table and log group.
 
+To connect to the hosted app, open `var/aws/api.env` locally and paste only the value of `TRUSTSQL_API_TOKEN` into Connection → Workspace API token, then choose Connect. The token in `.env.docker` is for the local app and is separate. Reloading clears the browser token. Never share either file or paste credentials into chat. A fresh protected visit opens Connection automatically; an invalid submitted token shows feedback next to the field.
+
+Hosted browser verification: set `TRUSTSQL_SMOKE_BASE_URL` to the Function URL, `TRUSTSQL_SMOKE_TOKEN_FILE=var/aws/api.env`, and `TRUSTSQL_SMOKE_EVALUATION=empty`, then run `python scripts/browser_smoke.py`. The AWS demo currently has no saved offline evaluation report; the local report remains separately verified.
+
 The handler seeds only synthetic data during cold start and uses SQLite read-only execution controls. DynamoDB provides durable redacted audit records and atomic rate limits across instances. Do not use this edition for real customer data or advertise it as the full production/PostgreSQL deployment.
 
 Deployment files: `infra/aws/template.json`, `infra/aws/lambda_handler.py`, `infra/aws/Dockerfile`, and `infra/aws/deploy.py`. The template is validated with CloudFormation before deployment. The code artifact bucket blocks public access. DynamoDB is retained on stack deletion to prevent accidental audit deletion; review/delete retained resources explicitly when decommissioning. The artifact bucket is separate and also requires deliberate cleanup.

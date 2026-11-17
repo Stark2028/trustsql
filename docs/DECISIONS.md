@@ -1,5 +1,9 @@
 # Decision log
 
+## ADR-012 — Explicit protected-workspace onboarding (2026-11-17, accepted)
+
+Keep the public app shell and authenticated API boundary. A first-visit 401 opens Connection and presents a neutral instruction; a rejected submitted token produces field-local feedback. Tokens remain in tab memory and clear on reload. Do not embed the deployment token in public assets or browser storage. AWS and local tokens remain separate. Verified against the deployed app on desktop and mobile.
+
 Append decisions with context, alternatives, consequences, and verification. Supersede old entries rather than rewriting history.
 
 ## ADR-001 — Modular monolith (2026-11-15, accepted)

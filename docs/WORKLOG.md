@@ -1,5 +1,13 @@
 # Work log
 
+## 2026-11-17 — Hosted authentication onboarding fix
+
+- Reproduced the reported homepage message: unauthenticated status returned 401 while the existing AWS token returned 200. No token was printed or rotated.
+- Changed the initial connection state to open Connection with a neutral instruction; invalid submitted tokens produce field-local feedback. Analysis stays disabled until the workspace is ready; credentials remain in memory only.
+- Full Linux regression: 95 passed, including PostgreSQL and DynamoDB tests. Hosted desktop/mobile browser checks pass missing/invalid/valid tokens, reload, query, clarification, catalog, empty evaluation state, history, and chart; no JS errors or horizontal overflow.
+- Rebuilt and updated the existing Lambda code. Deployed HTML/JS hashes match local files, readiness passes, and unauthenticated API access remains rejected. No provider requests or new infrastructure.
+- Browser smoke now selects a token file and expected report state explicitly. Public-content scanning also checks the private AWS token value.
+
 ## 2026-11-15 — Project initiation
 
 - Reviewed the DataHub India overview and agreed on a metadata-aware SQL agent with reliability evaluation.

@@ -19,12 +19,20 @@ async function api(path, options = {}) {
   try { body = await response.json(); } catch { throw new Error('The server returned an unreadable response. Check the connection and retry.'); }
   if (!response.ok) {
     const detail = body.error || {};
-    throw new Error(`${detail.message || 'The request could not be completed.'}${detail.request_id ? ` Request: ${detail.request_id.slice(0, 8)}` : ''}`);
+    const error = new Error(`${detail.message || 'The request could not be completed.'}${detail.request_id ? ` Request: ${detail.request_id.slice(0, 8)}` : ''}`);
+    error.status = response.status;
+    throw error;
   }
   return body;
 }
 async function connect() {
   $('global-error').hidden = true;
+  $('connection-notice').hidden = true;
+  $('token-error').hidden = true;
+  $('api-token').removeAttribute('aria-invalid');
+  $('connect-button').disabled = true;
+  $('connect-button').textContent = 'Connecting…';
+  $('run-button').disabled = true;
   try {
     const status = await api('/api/status');
     $('mode-badge').textContent = status.mode === 'demo' ? 'Deterministic demo' : 'Live · DataHub + LLM';
@@ -32,6 +40,7 @@ async function connect() {
     $('version').textContent = `v${status.version}`;
     $('connection-label').textContent = status.storage_ready ? `${status.database === 'postgres' ? 'PostgreSQL' : 'SQLite demo'} connected` : 'Database setup needed';
     $('connection-dot').classList.toggle('offline', !status.storage_ready);
+    $('run-button').disabled = !status.storage_ready;
     if (!status.storage_ready) showError('global-error', 'The database is not initialized or does not meet the reader policy. Follow the setup instructions before running analysis.');
     $('example-buttons').replaceChildren();
     const labels = ['Net revenue', 'Gross revenue', 'Top products', 'Completed orders'];
@@ -47,7 +56,22 @@ async function connect() {
     $('mode-badge').textContent = 'Connection required';
     $('connection-label').textContent = 'Connection required';
     $('connection-dot').classList.add('offline');
-    showError('global-error', error.message);
+    if (error.status === 401) {
+      $('connection-settings').open = true;
+      $('connection-notice').hidden = false;
+      if (apiToken) {
+        showError('token-error', 'This token was not accepted. Use the workspace token for this deployment, then try again.');
+        $('api-token').setAttribute('aria-invalid', 'true');
+        apiToken = '';
+        $('api-token').focus();
+      }
+      announce('Connect this workspace using its workspace API token.');
+    } else {
+      showError('global-error', error.message);
+    }
+  } finally {
+    $('connect-button').disabled = false;
+    $('connect-button').textContent = 'Connect';
   }
 }
 $('token-form').addEventListener('submit', async (event) => {

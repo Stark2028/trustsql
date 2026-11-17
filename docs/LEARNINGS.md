@@ -1,5 +1,9 @@
 # Learnings
 
+## A login requirement is a normal first-visit state
+
+A protected workspace should explain how to connect before displaying an error. Preserve the HTTP 401 boundary while making the connection form discoverable and distinguishing a missing token from a rejected one. Deployment-specific tokens also need explicit documentation: local configuration and AWS credentials are separate. Browser smoke tests must explicitly choose the token file and the expected evaluation-report state for their deployment.
+
 ## Metadata is part of answer correctness
 
 A query can execute successfully while counting the wrong business quantity. Schema names do not tell an agent whether revenue excludes cancellations or includes refunds. Store and retrieve explicit definitions, then evaluate actual result values.
