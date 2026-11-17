@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="An inspectable, metadata-aware SQL analyst with constrained execution and reproducible evaluation.">
+  <meta name="color-scheme" content="light">
+  <title>TrustSQL · Analyst workspace</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/mark.svg">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to workspace</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <a class="brand" href="/" aria-label="TrustSQL home"><img src="/assets/mark.svg" width="32" height="32" alt=""><span>TrustSQL<span class="brand-dot">.</span></span></a>
+      <p class="workspace-label">Commerce workspace</p>
+      <nav aria-label="Main">
+        <button class="nav-item active" data-view="analyst" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 5 6 7-6 7M13 19h6"/></svg>SQL analyst</button>
+        <button class="nav-item" data-view="catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/></svg>Data catalog<span id="catalog-count" class="nav-count">6</span></button>
+        <button class="nav-item" data-view="evaluations"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M8 15l4-5 4 2 4-7"/></svg>Evaluations</button>
+        <button class="nav-item" data-view="history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5v5h5M4 10a8 8 0 1 1 1 7M12 7v5l3 2"/></svg>Run history</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="connection-state"><span class="status-dot" id="connection-dot"></span><span id="connection-label">Connecting to workspace</span></div>
+        <details class="connection-settings"><summary>Connection</summary><form id="token-form"><label for="api-token">Workspace API token</label><input id="api-token" type="password" autocomplete="off" placeholder="Required on protected instances"><button class="secondary-button" type="submit">Connect</button><p>Kept in memory for this tab. Cleared on reload.</p></form></details>
+        <p class="sidebar-footnote">Context before confidence.</p>
+      </div>
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar"><span>Workspace <span class="crumb-separator">/</span> <strong id="view-name">SQL analyst</strong></span><div class="topbar-meta"><span id="mode-badge" class="mode-badge">Connecting</span><span id="reference-date">Reference date loading</span></div></header>
+      <main id="main" tabindex="-1">
+        <div id="global-error" class="notice error-notice" role="alert" hidden></div>
+
+        <section id="view-analyst" class="view" aria-labelledby="analyst-heading">
+          <div class="page-heading"><div><h1 id="analyst-heading">Ask a question. Inspect the answer.</h1><p>Business context, readable SQL, and evidence you can follow.</p></div><span class="scope-label"><span class="status-dot"></span>Curated commerce data</span></div>
+          <div class="analyst-grid">
+            <div class="analysis-column">
+              <form id="question-form" class="composer">
+                <label for="question">What would you like to understand?</label>
+                <textarea id="question" name="question" rows="3" maxlength="2000" minlength="4" required placeholder="What was our net revenue last month?" aria-describedby="question-help"></textarea>
+                <div class="composer-footer"><span id="question-help">Read-only execution <span aria-hidden="true">·</span> <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to run</span><button id="run-button" class="primary-button" type="submit"><span>Run analysis</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button></div>
+              </form>
+              <div class="examples"><span>Try a question</span><div id="example-buttons"></div></div>
+              <div id="run-error" class="notice error-notice" role="alert" hidden></div>
+              <div id="loading" class="loading-state" role="status" hidden><span class="loading-indicator"></span><div><strong>Following the evidence</strong><p>Retrieving context, checking SQL, and running the query.</p></div></div>
+
+              <section id="empty-state" class="empty-state" aria-label="No analysis yet"><div class="empty-art" aria-hidden="true"><svg viewBox="0 0 150 96"><rect x="15" y="10" width="120" height="76" rx="5"/><path d="M15 32h120M56 32v54M96 32v54M15 50h120M15 68h120"/><path class="empty-check" d="m65 57 8 8 16-18"/></svg></div><h2>A number is only the beginning.</h2><p>Run a question to see the result, the SQL behind it, and the metadata that shaped the answer.</p><div class="workflow-caption"><span>Retrieve context</span><span aria-hidden="true">→</span><span>Validate SQL</span><span aria-hidden="true">→</span><span>Inspect results</span></div></section>
+
+              <section id="answer-panel" class="answer-panel" aria-labelledby="answer-heading" hidden>
+                <div class="answer-topline"><span id="answer-status" class="result-badge">Analysis complete</span><span id="answer-timing"></span></div>
+                <h2 id="answer-heading">Analysis</h2><p id="answer-explanation"></p><div id="warnings"></div>
+                <div id="answer-tabs" class="tabs" role="tablist" aria-label="Inspect the analysis"><button id="tab-results" role="tab" aria-selected="true" aria-controls="panel-results" data-tab="results">Results</button><button id="tab-sql" role="tab" aria-selected="false" aria-controls="panel-sql" data-tab="sql" tabindex="-1">SQL query</button><button id="tab-trace" role="tab" aria-selected="false" aria-controls="panel-trace" data-tab="trace" tabindex="-1">Execution trace</button></div>
+                <div id="panel-results" class="tab-panel" role="tabpanel" aria-labelledby="tab-results"><div id="result-chart"></div><div id="result-table" class="table-scroll" tabindex="0" aria-label="Query results"></div><p id="result-caption" class="muted small"></p></div>
+                <div id="panel-sql" class="tab-panel" role="tabpanel" aria-labelledby="tab-sql" hidden><div class="code-toolbar"><span>Validated query</span><button id="copy-sql" class="text-button">Copy SQL</button></div><pre><code id="sql-code"></code></pre><section id="lineage-section" hidden aria-labelledby="lineage-heading"><h3 id="lineage-heading">Where each result comes from</h3><p class="muted small">Derived from this query and the approved schema. Value origins exclude indirect filter and join effects.</p><div id="lineage-table" class="table-scroll" tabindex="0" aria-label="Output column lineage"></div></section></div>
+                <div id="panel-trace" class="tab-panel" role="tabpanel" aria-labelledby="tab-trace" hidden><ol id="trace-list" class="trace-list"></ol></div>
+                <footer class="answer-footer"><span id="request-reference"></span><span>Audit record persisted</span></footer>
+              </section>
+            </div>
+
+            <aside class="evidence-column" aria-label="Metadata evidence"><div class="evidence-heading"><h2>Context & evidence</h2><span id="evidence-count">Before you ask</span></div><div id="evidence-list"><div class="definition"><span class="definition-label">Business definition</span><h3>Net revenue</h3><p>Completed-order sales, less successful refunds. Refunds follow the original order date.</p></div><div class="context-note"><h3>The grain matters.</h3><p>Multiple payments or refunds can duplicate order lines when joined directly. Aggregating before joining keeps the calculation at the right level.</p></div></div><div class="evidence-footnote"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z"/><path d="m8 12 3 3 5-6"/></svg><p>Metadata supports an answer. It does not guarantee correctness.</p></div></aside>
+          </div>
+        </section>
+
+        <section id="view-catalog" class="view" aria-labelledby="catalog-heading" hidden><div class="page-heading"><div><h1 id="catalog-heading">Data catalog</h1><p>The approved datasets and definitions available to the analyst.</p></div><span id="catalog-source" class="scope-label"></span></div><div id="catalog-list" class="catalog-list"></div></section>
+        <section id="view-evaluations" class="view" aria-labelledby="eval-heading" hidden><div class="page-heading"><div><h1 id="eval-heading">Evaluations</h1><p>Check the calculation against an independent reference answer.</p></div><button class="secondary-button" id="refresh-evaluations">Refresh report</button></div><div id="evaluation-content"></div></section>
+        <section id="view-history" class="view" aria-labelledby="history-heading" hidden><div class="page-heading"><div><h1 id="history-heading">Run history</h1><p>Durable records with question and SQL text redacted.</p></div><button class="secondary-button" id="refresh-history">Refresh history</button></div><div id="history-content" class="table-scroll"></div></section>
+      </main>
+      <footer class="workspace-footer"><span>TrustSQL <span id="version"></span></span><span>Built for questions worth checking.</span></footer>
+    </div>
+  </div>
+  <div id="announcements" class="sr-only" aria-live="polite"></div>
+</body>
+</html>
+

@@ -1,0 +1,70 @@
+name: trustsql
+services:
+  postgres:
+    image: postgres:17-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7
+    environment:
+      POSTGRES_USER: trustsql_owner
+      POSTGRES_DB: trustsql
+      POSTGRES_PASSWORD: ${TRUSTSQL_ADMIN_PASSWORD:?Generate .env.docker first}
+      TRUSTSQL_READER_PASSWORD: ${TRUSTSQL_READER_PASSWORD:?Generate .env.docker first}
+      TRUSTSQL_CONTROL_PASSWORD: ${TRUSTSQL_CONTROL_PASSWORD:?Generate .env.docker first}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sh:/docker-entrypoint-initdb.d/001-trustsql.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U trustsql_owner -d trustsql"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    mem_limit: 512m
+
+  bootstrap:
+    build: .
+    image: trustsql:local
+    command: [python, -m, trustsql.cli, bootstrap]
+    environment:
+      TRUSTSQL_ENVIRONMENT: development
+      TRUSTSQL_MODE: demo
+      TRUSTSQL_BOOTSTRAP_URL: postgresql+psycopg://trustsql_owner:${TRUSTSQL_ADMIN_PASSWORD}@postgres:5432/trustsql
+      TRUSTSQL_WAREHOUSE_URL: postgresql+psycopg://trustsql_reader:${TRUSTSQL_READER_PASSWORD}@postgres:5432/trustsql
+      TRUSTSQL_CONTROL_DATABASE_URL: postgresql+psycopg://trustsql_control:${TRUSTSQL_CONTROL_PASSWORD}@postgres:5432/trustsql
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build: .
+    image: trustsql:local
+    environment:
+      TRUSTSQL_ENVIRONMENT: ${TRUSTSQL_ENVIRONMENT:-development}
+      TRUSTSQL_MODE: ${TRUSTSQL_MODE:-demo}
+      TRUSTSQL_API_TOKEN: ${TRUSTSQL_API_TOKEN:?Generate a strong API token}
+      TRUSTSQL_ALLOWED_HOSTS: ${TRUSTSQL_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      TRUSTSQL_WAREHOUSE_URL: postgresql+psycopg://trustsql_reader:${TRUSTSQL_READER_PASSWORD}@postgres:5432/trustsql
+      TRUSTSQL_CONTROL_DATABASE_URL: postgresql+psycopg://trustsql_control:${TRUSTSQL_CONTROL_PASSWORD}@postgres:5432/trustsql
+      TRUSTSQL_LLM_BASE_URL: ${TRUSTSQL_LLM_BASE_URL:-https://api.openai.com/v1}
+      TRUSTSQL_LLM_MODEL: ${TRUSTSQL_LLM_MODEL:-gpt-4.1-mini}
+      TRUSTSQL_LLM_API_KEY: ${TRUSTSQL_LLM_API_KEY:-}
+      TRUSTSQL_DATAHUB_GRAPHQL_URL: ${TRUSTSQL_DATAHUB_GRAPHQL_URL:-http://host.docker.internal:8080/api/graphql}
+      TRUSTSQL_DATAHUB_TOKEN: ${TRUSTSQL_DATAHUB_TOKEN:-}
+    ports:
+      - "127.0.0.1:${TRUSTSQL_PORT:-8088}:8000"
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    volumes:
+      - app_reports:/app/var
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    pids_limit: 128
+    restart: unless-stopped
+volumes:
+  postgres_data:
+  app_reports:
+

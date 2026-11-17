@@ -1,0 +1,20 @@
+# Run with the optional acryl-datahub[postgres] connector environment.
+# Supply reader credentials through environment variables. No row profiling is enabled.
+source:
+  type: postgres
+  config:
+    host_port: ${POSTGRES_HOST_PORT}
+    database: trustsql
+    username: trustsql_reader
+    password: ${TRUSTSQL_READER_PASSWORD}
+    schema_pattern:
+      allow: ["analytics"]
+    include_views: false
+    profiling:
+      enabled: false
+sink:
+  type: datahub-rest
+  config:
+    server: ${DATAHUB_GMS_URL}
+    token: ${TRUSTSQL_DATAHUB_TOKEN}
+

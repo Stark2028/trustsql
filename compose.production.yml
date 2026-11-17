@@ -1,0 +1,25 @@
+services:
+  app:
+    environment:
+      TRUSTSQL_ENVIRONMENT: production
+      TRUSTSQL_MODE: live
+      TRUSTSQL_ALLOWED_HOSTS: ${TRUSTSQL_DOMAIN:?Set the production hostname},localhost,127.0.0.1
+  proxy:
+    image: caddy:2-alpine
+    environment:
+      TRUSTSQL_DOMAIN: ${TRUSTSQL_DOMAIN:?Set the production hostname}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  caddy_data:
+  caddy_config:
+

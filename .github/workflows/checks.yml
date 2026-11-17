@@ -1,0 +1,47 @@
+name: checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: trustsql_owner
+          POSTGRES_DB: trustsql
+          POSTGRES_PASSWORD: ci-owner-only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U trustsql_owner -d trustsql"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.lock
+      - run: pip install --no-deps -e .
+      - run: pip install pytest==9.1.1 ruff==0.15.21
+      - name: Initialize isolated CI PostgreSQL roles
+        run: sh infra/postgres/init.sh
+        env:
+          PGHOST: localhost
+          PGPASSWORD: ci-owner-only
+          POSTGRES_USER: trustsql_owner
+          POSTGRES_DB: trustsql
+          TRUSTSQL_READER_PASSWORD: ci-reader-only
+          TRUSTSQL_CONTROL_PASSWORD: ci-control-only
+      - name: Run checks and PostgreSQL integration suite
+        run: python -m pytest -q
+        env:
+          TRUSTSQL_TEST_POSTGRES_URL: postgresql+psycopg://trustsql_owner:ci-owner-only@localhost:5432/trustsql
+      - run: python -m trustsql.cli seed
+      - run: python -m trustsql.cli evaluate
+      - run: pip wheel --no-deps . -w artifacts
+      - run: docker build -t trustsql:ci .
+
